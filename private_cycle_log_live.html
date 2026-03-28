@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Private Cycle Log</title>
+  <style>
+    :root{
+      --bg1:#fff7f8;--bg2:#faf7f5;--card:#ffffffee;--text:#2f2927;--muted:#7a706a;
+      --rose:#f5bcc8;--rose2:#fde6ea;--stone:#ece7e4;--stone2:#f5f1ef;--green:#dff3e7;
+      --orange:#fde7d0;--amber:#fdeccf;--blue:#e7f2fb;--border:#ece6e2;
+      --shadow:0 8px 24px rgba(66,40,35,.08);
+    }
+    *{box-sizing:border-box} body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--text);background:linear-gradient(to bottom,var(--bg1),var(--bg2),#fff)}
+    .wrap{max-width:1100px;margin:0 auto;padding:16px}
+    .grid-top{display:grid;gap:16px}@media (min-width:950px){.grid-top{grid-template-columns:1.3fr .7fr}}
+    .grid-main{display:grid;gap:24px}@media (min-width:950px){.grid-main{grid-template-columns:1fr 1.1fr}}
+    .card{background:var(--card);border-radius:28px;box-shadow:var(--shadow);padding:22px;border:1px solid rgba(255,255,255,.5)}
+    .title-row{display:flex;justify-content:space-between;gap:14px;align-items:flex-start}.badge{background:#251f1d;color:#fff;border-radius:999px;padding:8px 12px;font-size:12px}
+    h1,h2,h3,p{margin:0} h1{font-size:30px} h3{font-size:18px}
+    .sub{color:var(--muted);margin-top:8px;line-height:1.45}
+    .stats{display:grid;gap:12px;margin-top:12px}@media (min-width:700px){.stats{grid-template-columns:repeat(4,1fr)}}
+    .stat{border-radius:24px;padding:16px}.stat small{display:block;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;font-size:11px}.stat strong{display:block;margin-top:8px;font-size:20px}
+    .rose{background:var(--rose2)}.orange{background:var(--orange)}.green{background:var(--green)}.stone{background:var(--stone2)}
+    .nav{display:flex;gap:10px;margin:18px 0}.nav button,.btn,.chip,.cal-btn{appearance:none;border:none;cursor:pointer;font:inherit}
+    .nav button{border-radius:999px;padding:10px 16px;background:#ded7d2;color:#534944}.nav button.active{background:var(--rose);color:#2f2927}
+    .section{display:none}.section.active{display:block}.helper{color:var(--muted);font-size:14px}
+    .group{margin:18px 0}.group-label{font-weight:600;font-size:14px;margin-bottom:6px}.group-help{font-size:12px;color:var(--muted);margin-bottom:8px}
+    .chips{display:flex;flex-wrap:wrap;gap:8px}.chip{background:var(--stone2);color:#5f5550;padding:8px 14px;border-radius:999px;transition:.15s ease;border:1px solid transparent}.chip.active{background:var(--rose);color:#2f2927}
+    .btn{width:100%;padding:12px 16px;border-radius:18px;margin-top:10px}.btn.outline{background:#fff;border:1px solid #d6cdc8;color:#2f2927}.btn.dark{background:#251f1d;color:#fff}.btn:disabled{opacity:.6;cursor:not-allowed}
+    .msg{text-align:center;color:var(--muted);font-size:14px;margin-top:8px}.tiny{text-align:center;color:var(--muted);font-size:12px;margin-top:8px;line-height:1.35}
+    .cal-head{display:flex;justify-content:space-between;align-items:center;gap:10px}.cal-nav{display:flex;align-items:center;gap:8px}
+    .cal-btn{width:36px;height:36px;border-radius:999px;background:#fff;border:1px solid var(--border)}.month-label{min-width:120px;text-align:center;font-size:14px;font-weight:600;color:#5c514c}
+    .dow,.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}.dow{margin:14px 0 10px;color:#b0a49f;text-transform:uppercase;font-size:11px;text-align:center}
+    .day{min-height:80px;border-radius:22px;border:1px solid #f0ebe8;background:#fff;padding:10px;text-align:left;position:relative;cursor:pointer;color:#2f2927}
+    .day.outside{opacity:.4}.day.selected{background:#f8dbe2;border-color:#f0a8bb}.daynum{font-size:14px;font-weight:600}.dots{display:flex;gap:5px;flex-wrap:wrap;margin-top:10px}.dot{width:10px;height:10px;border-radius:999px;display:inline-block}
+    .legend{display:flex;flex-wrap:wrap;gap:14px;margin-top:14px;font-size:12px;color:var(--muted)}.legend span{display:inline-flex;align-items:center;gap:6px}.side-stack{display:grid;gap:24px}
+    @media (max-width:949px){.grid-main{grid-template-columns:1fr}}
+    .feature-grid{display:grid;gap:12px}@media (min-width:650px){.feature-grid{grid-template-columns:1fr 1fr}}
+    .feature{border-radius:24px;padding:16px;font-size:14px;color:#5f5550}.feature b{display:block;color:#2f2927;margin-bottom:6px}.summary{display:grid;gap:8px;font-size:14px;color:#6a5f59}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="grid-top">
+      <div class="card">
+        <div class="title-row">
+          <div>
+            <h1>🌙 Private Cycle Log</h1>
+            <p class="sub">Soft, simple, and private. Built to help you collect clean data first, then analyze patterns later.</p>
+          </div>
+          <div class="badge">Option B</div>
+        </div>
+        <div class="stats">
+          <div class="stat rose"><small>Next period</small><strong id="statNextPeriod">Log a cycle first</strong></div>
+          <div class="stat orange"><small>Estimated ovulation</small><strong id="statOvulation">Log a cycle first</strong></div>
+          <div class="stat green"><small>Average cycle</small><strong id="statAvgCycle">28 days</strong></div>
+          <div class="stat stone"><small>Logged days</small><strong id="statLoggedDays">0</strong></div>
+        </div>
+      </div>
+      <div class="card">
+        <h3>🔒 Privacy</h3>
+        <div class="sub" style="margin-top:12px">
+          <div class="stat stone" style="margin-bottom:10px">Stored only in your browser on your device.</div>
+          <div class="stat stone" style="margin-bottom:10px">No login. No cloud sync. No data sharing beyond your manual Google Sheets sync.</div>
+          <div class="stat stone">Export a CSV whenever you want to analyze your data elsewhere.</div>
+        </div>
+        <button class="btn dark" id="exportBtn">Export CSV</button>
+      </div>
+    </div>
+
+    <div class="nav">
+      <button class="active" data-view="home">Home</button>
+      <button data-view="calendar">Calendar</button>
+    </div>
+
+    <div id="homeSection" class="section active">
+      <div class="card" style="max-width:720px;margin:0 auto">
+        <h3>Today’s Check-in</h3>
+        <p class="helper" id="homeDateLabel" style="margin-top:6px"></p>
+        <div class="stat rose" style="margin-top:16px">
+          <div style="font-weight:600;color:#2f2927;margin-bottom:6px">Today at a glance</div>
+          <div class="helper">Next period: <span id="homeNextPeriod" style="font-weight:600;color:#2f2927"></span></div>
+          <div class="helper">Estimated ovulation: <span id="homeOvulation" style="font-weight:600;color:#2f2927"></span></div>
+        </div>
+        <div id="homeFields"></div>
+        <button class="btn outline" id="saveLocalBtn">Save today’s entry locally</button>
+        <div class="msg" id="saveMessage"></div>
+        <button class="btn dark" id="syncBtn">Sync today’s entry to Google Sheets</button>
+        <div class="msg" id="syncMessage"></div>
+        <div class="tiny">Selections save automatically as you tap. Use the local save button for reassurance, and sync when you want the entry pushed to Google Sheets.</div>
+      </div>
+    </div>
+
+    <div id="calendarSection" class="section">
+      <div class="grid-main">
+        <div class="card">
+          <div class="cal-head">
+            <h3>📅 Calendar</h3>
+            <div class="cal-nav">
+              <button class="cal-btn" id="prevMonthBtn">‹</button>
+              <div class="month-label" id="monthLabel"></div>
+              <button class="cal-btn" id="nextMonthBtn">›</button>
+            </div>
+          </div>
+          <div class="dow"><div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div></div>
+          <div class="calendar" id="calendarGrid"></div>
+          <div class="legend">
+            <span><i class="dot" style="background:#fb7185"></i>Logged period</span>
+            <span><i class="dot" style="background:#fecdd3"></i>Predicted period</span>
+            <span><i class="dot" style="background:#34d399"></i>Estimated ovulation</span>
+            <span><i class="dot" style="background:#fcd34d"></i>Acne logged</span>
+          </div>
+        </div>
+        <div class="side-stack">
+          <div class="card">
+            <h3 id="selectedDateTitle"></h3>
+            <p class="helper" style="margin-top:6px">Built for easy tapping, not typing.</p>
+            <div id="selectedFields"></div>
+          </div>
+          <div class="card">
+            <h3>Starter feature set</h3>
+            <div class="feature-grid" style="margin-top:14px">
+              <div class="feature" style="background:var(--rose2)"><b>🩸 Period specifics</b>Flow and cramps logged by day.</div>
+              <div class="feature" style="background:var(--blue)"><b>🔋 Energy tracking</b>See how your cycle lines up with energy.</div>
+              <div class="feature" style="background:var(--amber)"><b>✨ Skin patterns</b>Track acne flare timing.</div>
+              <div class="feature" style="background:var(--green)"><b>🍎 Later add-ons</b>Food prompts, sleep nudges, and smarter predictions.</div>
+            </div>
+          </div>
+          <div class="card">
+            <h3>😊 Tiny summary</h3>
+            <div class="summary" style="margin-top:14px">
+              <div>Logged period days: <b id="summaryPeriodCount"></b></div>
+              <div>Last cycle start: <b id="summaryLastStart"></b></div>
+              <div>Estimated fertile window: <b id="summaryFertile"></b></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+<script>
+(() => {
+  const STORAGE_KEY = "private-period-tracker-live-v1";
+  const SHEETS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxVstLXUSyy-2-FEfDtB24HVDtXX7t_f3Sx94tFlnc0z-fIT1ailkgwETlJOwXqZjPBmg/exec";
+  const flowOptions = ["None","Spotting","Light","Medium","Heavy"];
+  const crampOptions = ["None","Mild","Moderate","Strong"];
+  const energyOptions = ["Very low","Low","Okay","Good","High"];
+  const appetiteOptions = ["Low","Normal","Hungry","Very hungry"];
+  const moodOptions = ["Calm","Good","Emotional","Irritable","Anxious","Low"];
+  const acneOptions = ["None","A little","Some","A lot"];
+  const fields = [
+    { key:"flow", label:"Flow", options:flowOptions, multiple:false },
+    { key:"cramps", label:"Cramps", options:crampOptions, multiple:false },
+    { key:"energy", label:"Energy", options:energyOptions, multiple:false },
+    { key:"appetite", label:"Appetite", options:appetiteOptions, multiple:false },
+    { key:"mood", label:"Mood", options:moodOptions, multiple:true, helperText:"Choose all that apply" },
+    { key:"acne", label:"Acne", options:acneOptions, multiple:false },
+  ];
+  const state = { data: loadData(), view:"home", selectedDate: toISODate(new Date()), cursor:new Date(), syncing:false };
+
+  function defaultData(){ return { settings:{ averageCycleLength:28, averagePeriodLength:5 }, entries:{} }; }
+  function loadData(){ try{ const raw = localStorage.getItem(STORAGE_KEY); return raw ? JSON.parse(raw) : defaultData(); } catch { return defaultData(); } }
+  function persist(){ localStorage.setItem(STORAGE_KEY, JSON.stringify(state.data)); }
+  function toISODate(date){ const d=new Date(date); const y=d.getFullYear(); const m=String(d.getMonth()+1).padStart(2,"0"); const day=String(d.getDate()).padStart(2,"0"); return `${y}-${m}-${day}`; }
+  function formatDate(dateString){ return new Date(`${dateString}T12:00:00`).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}); }
+  function addDays(dateString,days){ const d=new Date(`${dateString}T12:00:00`); d.setDate(d.getDate()+days); return toISODate(d); }
+  function diffDays(a,b){ const d1=new Date(`${a}T12:00:00`); const d2=new Date(`${b}T12:00:00`); return Math.round((d2-d1)/(1000*60*60*24)); }
+  function average(nums){ if(!nums.length) return 0; return Math.round(nums.reduce((sum,n)=>sum+n,0)/nums.length); }
+
+  function getEntry(date){
+    const existing = state.data.entries[date];
+    if(existing){ return { ...existing, mood:Array.isArray(existing.mood) ? existing.mood : existing.mood ? [existing.mood] : [] }; }
+    return { date, flow:"None", cramps:"None", energy:"Okay", appetite:"Normal", mood:[], acne:"None" };
+  }
+  function setField(date, field, value){ state.data.entries[date] = { ...getEntry(date), [field]: value }; persist(); render(); }
+  function toggleMood(date, moodValue){
+    const entry = getEntry(date);
+    const currentMoods = Array.isArray(entry.mood) ? entry.mood : [];
+    const nextMoods = currentMoods.includes(moodValue) ? currentMoods.filter((m)=>m!==moodValue) : [...currentMoods, moodValue];
+    state.data.entries[date] = { ...entry, mood: nextMoods }; persist(); render();
+  }
+  function cycleStarts(entries){
+    return Object.values(entries).filter((entry)=>entry.flow && entry.flow !== "None").sort((a,b)=>a.date.localeCompare(b.date)).filter((entry,index,arr)=>index===0 ? true : diffDays(arr[index-1].date, entry.date) > 7).map((entry)=>entry.date);
+  }
+  function predictions(){
+    const starts = cycleStarts(state.data.entries); const cycleLengths = [];
+    for(let i=1;i<starts.length;i+=1) cycleLengths.push(diffDays(starts[i-1], starts[i]));
+    const avgCycle = cycleLengths.length ? average(cycleLengths) : state.data.settings.averageCycleLength;
+    const lastStart = starts[starts.length-1] || null;
+    const nextPeriod = lastStart ? addDays(lastStart, avgCycle) : null;
+    const ovulation = nextPeriod ? addDays(nextPeriod, -14) : null;
+    const fertileStart = ovulation ? addDays(ovulation, -5) : null;
+    const fertileEnd = ovulation ? addDays(ovulation, 1) : null;
+    return { avgCycle, lastStart, nextPeriod, ovulation, fertileStart, fertileEnd };
+  }
+  function monthGrid(baseDate = new Date()){
+    const year=baseDate.getFullYear(), month=baseDate.getMonth(), first=new Date(year,month,1), startOffset=first.getDay(), start=new Date(year,month,1-startOffset);
+    return Array.from({length:42},(_,i)=>{ const d=new Date(start); d.setDate(start.getDate()+i); return d; });
+  }
+  function exportCSV(){
+    const rows = Object.values(state.data.entries).sort((a,b)=>a.date.localeCompare(b.date)); if(!rows.length) return;
+    const normalizedRows = rows.map((row)=>({ ...row, mood:Array.isArray(row.mood) ? row.mood.join(" | ") : row.mood }));
+    const headers = Object.keys(normalizedRows[0]);
+    const csv = [headers.join(",")].concat(normalizedRows.map((row)=>headers.map((header)=>`"${String(row[header] ?? "").replaceAll('"','""')}"`).join(","))).join("\n");
+    const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"}), url=URL.createObjectURL(blob), link=document.createElement("a");
+    link.href=url; link.download="period-tracker-data.csv"; document.body.appendChild(link); link.click(); document.body.removeChild(link); URL.revokeObjectURL(url);
+  }
+  async function syncTodayToGoogleSheets(){
+    const today=toISODate(new Date()), baseEntry=getEntry(today), entryToSync={ ...baseEntry, mood:Array.isArray(baseEntry.mood) ? baseEntry.mood.join(" | ") : baseEntry.mood };
+    if(state.syncing) return;
+    const alreadySyncedKey=`synced-${entryToSync.date}`, alreadySynced=localStorage.getItem(alreadySyncedKey);
+    if(alreadySynced){ setSyncMessage("This date was already synced"); return; }
+    state.syncing=true; const btn=document.getElementById("syncBtn"); btn.disabled=true; btn.textContent="Syncing..."; setSyncMessage("Syncing...");
+    try{
+      const response = await fetch(SHEETS_WEB_APP_URL,{ method:"POST", headers:{ "Content-Type":"text/plain;charset=utf-8" }, body:JSON.stringify(entryToSync), redirect:"follow" });
+      const rawText = await response.text(); let result = null; try{ result = JSON.parse(rawText); } catch {}
+      if(!response.ok) setSyncMessage(`Sync failed (${response.status})`);
+      else if(result && result.success){ localStorage.setItem(alreadySyncedKey,"true"); setSyncMessage("Synced to Google Sheets"); }
+      else if(result && result.error) setSyncMessage(`Sync failed: ${result.error}`);
+      else if(rawText) setSyncMessage(`Unexpected response: ${rawText.slice(0,120)}`);
+      else setSyncMessage("Sync failed");
+    } catch(error){ setSyncMessage(`Sync failed: ${error && error.message ? error.message : "Unknown error"}`); }
+    finally{ state.syncing=false; btn.disabled=false; btn.textContent="Sync today’s entry to Google Sheets"; }
+  }
+  function setSyncMessage(msg){ document.getElementById("syncMessage").textContent = msg || ""; }
+  function setSaveMessage(msg){ document.getElementById("saveMessage").textContent = msg || ""; }
+  function renderChipGroup(target, date, field){
+    const entry=getEntry(date), group=document.createElement("div"); group.className="group";
+    const label=document.createElement("div"); label.className="group-label"; label.textContent=field.label; group.appendChild(label);
+    if(field.helperText){ const helper=document.createElement("div"); helper.className="group-help"; helper.textContent=field.helperText; group.appendChild(helper); }
+    const chips=document.createElement("div"); chips.className="chips";
+    field.options.forEach((option)=>{ const btn=document.createElement("button"); btn.type="button"; btn.className="chip"; const selected=field.multiple ? Array.isArray(entry[field.key]) && entry[field.key].includes(option) : entry[field.key]===option; if(selected) btn.classList.add("active"); btn.textContent=option; btn.addEventListener("click",()=>field.key==="mood" ? toggleMood(date, option) : setField(date, field.key, option)); chips.appendChild(btn); });
+    group.appendChild(chips); target.appendChild(group);
+  }
+  function renderHome(){
+    const today=toISODate(new Date()), pred=predictions();
+    document.getElementById("homeDateLabel").textContent=`Quick daily log for ${formatDate(today)}`;
+    document.getElementById("homeNextPeriod").textContent=pred.nextPeriod ? formatDate(pred.nextPeriod) : "Log a cycle first";
+    document.getElementById("homeOvulation").textContent=pred.ovulation ? formatDate(pred.ovulation) : "Log a cycle first";
+    const homeFields=document.getElementById("homeFields"); homeFields.innerHTML=""; fields.forEach((field)=>renderChipGroup(homeFields, today, field));
+    document.getElementById("saveLocalBtn").onclick=()=>{ persist(); setSaveMessage(`Saved locally for ${formatDate(today)}`); setTimeout(()=>setSaveMessage(""), 2000); };
+    document.getElementById("syncBtn").onclick=syncTodayToGoogleSheets;
+  }
+  function renderCalendar(){
+    const pred=predictions(); document.getElementById("monthLabel").textContent=state.cursor.toLocaleDateString(undefined,{month:"long",year:"numeric"});
+    const gridEl=document.getElementById("calendarGrid"); gridEl.innerHTML=""; const grid=monthGrid(state.cursor), today=toISODate(new Date());
+    grid.forEach((dateObj)=>{ const iso=toISODate(dateObj), entry=state.data.entries[iso], isCurrentMonth=dateObj.getMonth()===state.cursor.getMonth(), isSelected=iso===state.selectedDate, hasPeriod=entry && entry.flow && entry.flow!=="None", hasAcne=entry && entry.acne && entry.acne!=="None", isOvulation=pred.ovulation===iso, isPredictedPeriod=pred.nextPeriod && iso>=pred.nextPeriod && iso<addDays(pred.nextPeriod, state.data.settings.averagePeriodLength);
+      const btn=document.createElement("button"); btn.type="button"; btn.className=`day${isCurrentMonth ? "" : " outside"}${isSelected ? " selected" : ""}`; btn.innerHTML=`<div class="daynum">${dateObj.getDate()}</div>`;
+      const dots=document.createElement("div"); dots.className="dots"; if(hasPeriod) dots.innerHTML+=`<span class="dot" style="background:#fb7185"></span>`; if(isPredictedPeriod && !hasPeriod) dots.innerHTML+=`<span class="dot" style="background:#fecdd3"></span>`; if(isOvulation) dots.innerHTML+=`<span class="dot" style="background:#34d399"></span>`; if(hasAcne) dots.innerHTML+=`<span class="dot" style="background:#fcd34d"></span>`; btn.appendChild(dots);
+      if(iso===today){ const todayTag=document.createElement("div"); todayTag.style.cssText="position:absolute;right:10px;top:10px;font-size:10px;text-transform:uppercase;color:#8b7d76"; todayTag.textContent="Today"; btn.appendChild(todayTag); }
+      btn.addEventListener("click",()=>{ state.selectedDate=iso; render(); }); gridEl.appendChild(btn);
+    });
+    document.getElementById("selectedDateTitle").textContent=`Daily check-in for ${formatDate(state.selectedDate)}`;
+    const selectedFields=document.getElementById("selectedFields"); selectedFields.innerHTML=""; fields.forEach((field)=>renderChipGroup(selectedFields, state.selectedDate, field));
+    const periodCount=Object.values(state.data.entries).filter((entry)=>entry.flow!=="None").length;
+    document.getElementById("summaryPeriodCount").textContent=periodCount;
+    document.getElementById("summaryLastStart").textContent=pred.lastStart ? formatDate(pred.lastStart) : "None yet";
+    document.getElementById("summaryFertile").textContent=pred.fertileStart && pred.fertileEnd ? `${formatDate(pred.fertileStart)} – ${formatDate(pred.fertileEnd)}` : "Not enough data yet";
+  }
+  function renderTopStats(){
+    const pred=predictions();
+    document.getElementById("statNextPeriod").textContent=pred.nextPeriod ? formatDate(pred.nextPeriod) : "Log a cycle first";
+    document.getElementById("statOvulation").textContent=pred.ovulation ? formatDate(pred.ovulation) : "Log a cycle first";
+    document.getElementById("statAvgCycle").textContent=`${pred.avgCycle} days`;
+    document.getElementById("statLoggedDays").textContent=Object.keys(state.data.entries).length;
+  }
+  function render(){
+    renderTopStats(); renderHome(); renderCalendar();
+    document.getElementById("homeSection").classList.toggle("active", state.view==="home");
+    document.getElementById("calendarSection").classList.toggle("active", state.view==="calendar");
+    document.querySelectorAll(".nav button").forEach((btn)=>btn.classList.toggle("active", btn.dataset.view===state.view));
+  }
+  document.querySelectorAll(".nav button").forEach((btn)=>btn.addEventListener("click",()=>{ state.view=btn.dataset.view; render(); }));
+  document.getElementById("prevMonthBtn").addEventListener("click",()=>{ state.cursor=new Date(state.cursor.getFullYear(), state.cursor.getMonth()-1, 1); renderCalendar(); });
+  document.getElementById("nextMonthBtn").addEventListener("click",()=>{ state.cursor=new Date(state.cursor.getFullYear(), state.cursor.getMonth()+1, 1); renderCalendar(); });
+  document.getElementById("exportBtn").addEventListener("click", exportCSV);
+  render();
+})();
+</script>
+</body>
+</html>
